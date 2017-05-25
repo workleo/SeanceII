@@ -1,0 +1,23 @@
+{
+    "name": "leo/session imitator",
+    "description": "This is an application of sessions imitation",
+    "license": "LGPL-3.0",
+    "authors": [
+        {
+            "name": "Leonid",
+            "email": "antropoid2017@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.5.0",
+        "twig/twig": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "classes\\": "src/code/classes/",
+            "test_storage\\":"src/code/test_storage/"
+        }
+    }
+
+}

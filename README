@@ -1,0 +1,5 @@
+    This is a project for simulating php sessions. As an example, the Rorschach test was used.
+One important point: pages with test answers can not be returned. The test can only be performed
+from scratch.
+P. S. The beginning of this project is Seance/src/start.php
+      Seance/src/code/classes/SessionStorage.php is a session simulation class.
