@@ -6,29 +6,6 @@ namespace classes;
 class IndexPageControl
 {
 
-
-    /*
-       ** @var  SessionStorage $session *
-    private $session;
-    private $submitValue;
-
-
-    public function session_seans()
-    {
-        $this->session = new SessionStorage('/SeanceII/src/');
-        $this->submitValue = 'Пройти тест?';
-        $this->session->start();
-        $this->save_session();
-    }
-
-
-    private function save_session()
-    {
-        $this->session->set('current_page', "0");
-        $this->session->flush();
-    }
-*/
-
     public function getTitle(): string
     {
         return "НАЧАЛО ТЕСТА";
@@ -36,7 +13,7 @@ class IndexPageControl
 
     public function getSubmitValue(): string
     {
-        return 'Пройти тест?';//$this->submitValue;
+        return 'Пройти тест?';
     }
 
     public function getDescription(): string

@@ -4,35 +4,37 @@ namespace classes;
 
 class TestControl
 {
-    /** @var  SessionStorage $session */
-    private $session;
-    private $current_page;
-    private $questions_arr;
-    private $picture_src;
-    private $page_title;
+    /** @var  SessionStorage $seance */
+    private $seance;
+    private $currentPage;
+    private $questionsArr;
+    private $pictureSrc;
+    private $pageTitle;
     private $userName;
     private $isReload;
 
 
-    public function session_seance()
+    public function seanceExecute()
     {
-        $this->session = new SessionStorage('/SeanceII/src/');
-        $this->session->start();
+        $this->seance = new SessionStorage('/SeanceII/src/');
+        $this->seance->start();
 
-        if (($this->session->get('order') !== null) && ($this->session->get('order') === 'wrong')) {
-            $this->isReload = true;
+        if (($this->seance->get('order') !== null) && ($this->seance->get('order') === 'wrong')) {
+            {
+                $this->isReload = true;
+            }
         } else $this->isReload = false;
 
-        $this->userName = $this->session->get('user_name');
+        $this->userName = $this->seance->get('user_name');
 
-        $this->current_page = $this->session->get('current_page');
+        $this->currentPage = $this->seance->get('current_page');
 
 
-        if ($this->session->get('sess_post') == null)
-            $this->current_page = '00';
+        if ($this->seance->get('sess_post') == null)
+            $this->currentPage = '00';
 
-        $this->analyse_of_source();
-        $this->save_session();
+        $this->analyseOfSource();
+        $this->saveSeance();
 
 
     }
@@ -45,61 +47,69 @@ class TestControl
 
     public function getPictureSrc()
     {
-        return $this->picture_src;
+        return $this->pictureSrc;
     }
 
     public function getCurrentPage()
     {
-        return $this->current_page;
+        return $this->currentPage;
     }
 
     public function getQuestionsArr()
     {
-        return $this->questions_arr;
+        return $this->questionsArr;
     }
 
     public function getPageTitle()
     {
-        return $this->page_title;
+        return $this->pageTitle;
     }
 
 
     public function getSessionPage()
     {
-        return $this->session->get('current_page');
+        return $this->seance->get('current_page');
     }
 
-    private function prepare_questions_arr(string $id_page)
+    private function prepareQuestionsArray(string $id_page)
     {
         $fileName = $_SERVER['DOCUMENT_ROOT'] . 'src/res/test_txt/ask' . $id_page . '.txt';
         $json = file_get_contents($fileName);
-        $this->questions_arr = json_decode($json, true);
+        $this->questionsArr = json_decode($json, true);
     }
 
 
-    private function prepare_page_params(string $id_page)
+    private function preparePageParams(string $id_page)
     {
-        $this->prepare_questions_arr($id_page);
-        $this->picture_src = '../res/img/pict' . $id_page . '.jpg';
-        $this->page_title = "Картинка №" . $id_page;
+        $this->prepareQuestionsArray($id_page);
+        $this->pictureSrc = '../res/img/pict' . $id_page . '.jpg';
+        $this->pageTitle = "Картинка №" . $id_page;
 
-        $this->register_page();
-        $this->save_session();
+        $this->registerPage();
+        $this->saveSeance();
     }
 
-    private function register_answer(string $id_page): bool
+    private function registerAnswer(string $id_page): bool
     {
-        $sess_post = $this->session->get('sess_post');
+        $seancePost = $this->seance->get('sess_post');
 
-        if (($sess_post != null) && (isset($sess_post['option']))) {
-            $this->prepare_questions_arr($id_page);
-            $answ_options = $this->session->get('answers');
+        if (($seancePost != null) && (isset($seancePost['option']))) {
+            $this->prepareQuestionsArray($id_page);
+            $answOptionsArray = $this->seance->get('answers');
+            if ($answOptionsArray == null) {
+                $answOptionsArray = [];
+            }
 
-            $key = '' . $sess_post['option'];
-            $key = $this->number2name($key);
+            $key = '' . $seancePost['option'];
+            $key = $this->numberToName($key);
+            $newRecord = [$seancePost['option'] => $this->questionsArr[$key]];
+            $answOptionsArray[$id_page] = $newRecord;
 
-            $answ_options[$id_page] = array($sess_post['option'] => $this->questions_arr[$key]);
-            $this->session->set('answers', $answ_options);
+            if (!(is_array($answOptionsArray))) {
+                die('Something went wrong.' . $answOptionsArray . ' is not an array.');
+            }
+
+            $this->seance->set('answers', $answOptionsArray);
 
             return true;
         } else {
@@ -108,19 +118,19 @@ class TestControl
 
     }
 
-    private function register_page()
+    private function registerPage()
     {
-        $this->session->set('current_page', $this->current_page);
+        $this->seance->set('current_page', $this->currentPage);
     }
 
-    private function prepare_page(string $id_page)
+    private function preparePage(string $id_page)
     {
-        $this->current_page = $id_page;
-        $this->prepare_page_params($id_page);
+        $this->currentPage = $id_page;
+        $this->preparePageParams($id_page);
     }
 
 
-    private function number2name(int $nr): string
+    private function numberToName(int $nr): string
     {
         $name = $nr;
         if (strlen($name) == 1) {
@@ -129,28 +139,28 @@ class TestControl
         return $name;
     }
 
-    private function analyse_of_source()
+    private function analyseOfSource()
     {
-        $page = (int)$this->current_page;
+        $page = (int)$this->currentPage;
 
         if (!$this->isReload) {
-            $next_page = $this->number2name($page + 1);
-        } else{
-            $next_page = $this->current_page;
+            $nextPage = $this->numberToName($page + 1);
+        } else {
+            $nextPage = $this->currentPage;
         }
 
         switch (true) {
             case $page == 0:
-                $this->prepare_page("01");
+                $this->preparePage("01");
                 break;
             case ($page > 0 && $page < 10) ://01-09
-                if ($this->register_answer($this->current_page))
-                    $this->prepare_page($next_page);
+                if ($this->registerAnswer($this->currentPage))
+                    $this->preparePage($nextPage);
                 break;
             case $page == 10:
-                if ($this->register_answer($this->current_page)) {//10
-                    $this->current_page = '11';
-                    $this->register_page();
+                if ($this->registerAnswer($this->currentPage)) {//10
+                    $this->currentPage = '11';
+                    $this->registerPage();
 
                 }
                 break;
@@ -159,11 +169,11 @@ class TestControl
     }
 
 
-    private function save_session()
+    private function saveSeance()
     {
         if (!$this->isReload) {
-            $this->session->set('order', 'wrong');
-            $this->session->flush();
+            $this->seance->set('order', 'wrong');
+            $this->seance->flush();
         }
     }
 }

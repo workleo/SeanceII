@@ -4,22 +4,22 @@ namespace classes;
 
 class FinalPageControl
 {
-    /** @var  SessionStorage $session */
-    private $session;
-    private $picture_src;
-    private $page_title;
+    /** @var  SessionStorage $seance */
+    private $seance;
+    private $pictureSrc;
+    private $pageTitle;
     private $userName;
 
-    public function session_seans()
+    public function seanceExecute()
     {
-        $this->session = new SessionStorage('/SeanceII/src/');
-        $this->session->start();
-        $this->userName=$this->session->get('user_name');
-        $this->picture_src = '../res/img/logo.png';
-        $this->page_title = 'Результат';
-        $this->session->set('current_page', '12');
+        $this->seance = new SessionStorage('/SeanceII/src/');
+        $this->seance->start();
+        $this->userName=$this->seance->get('user_name');
+        $this->pictureSrc = '../res/img/logo.png';
+        $this->pageTitle = 'Результат';
+        $this->seance->set('current_page', '12');
 
-        $this->session->flush();
+        $this->seance->flush();
     }
 
     public function getUserName()
@@ -29,12 +29,12 @@ class FinalPageControl
 
     public function getPictureSrc()
     {
-        return $this->picture_src;
+        return $this->pictureSrc;
     }
 
     public function getPageTitle()
     {
-        return $this->page_title;
+        return $this->pageTitle;
     }
 
 
@@ -57,7 +57,7 @@ class FinalPageControl
     public function getDescription(): string
     {
         $description = '';
-        $fileName = $_SERVER['DOCUMENT_ROOT'] . '/src/res/test_txt/end.txt';
+        $fileName =__DIR__.'/../../res/test_txt/end.txt';
         if (file_exists($fileName) === true) {
             $json = file_get_contents($fileName);
             $description = json_decode($json, true)['description'];
@@ -75,32 +75,32 @@ class FinalPageControl
 
     public function getAnswers()
     {
-        $answ_arr = [];
-        $fileName = $_SERVER['DOCUMENT_ROOT'] . '/src/res/test_txt/answers.txt';
+        $answers = [];
+        $fileName = __DIR__ . '/../../res/test_txt/answers.txt';
         if (file_exists($fileName) === true) {
             $json = file_get_contents($fileName);
-            $file_answ = unserialize(json_decode($json, true)['answers']);
+            $answersFile = unserialize(json_decode($json, true)['answers']);
 
-            $answ_options = $this->session->get('answers');
-            foreach ($answ_options as $key => $item) {
+            $answersOptions = $this->seance->get('answers');
+            foreach ($answersOptions as $key => $item) {
                 foreach ($item as $id => $val) {
 
-                    $answ_arr['t' . $key] = $file_answ[$key][0];
-                    $answ_arr['i' . $key] = $id;
-                    $answ_arr['a' . $key] = 'Ваш ответ :' . $val;
+                    $answers['t' . $key] = $answersFile[$key][0];
+                    $answers['i' . $key] = $id;
+                    $answers['a' . $key] = 'Ваш ответ :' . $val;
                     if ($key !== '05') {
-                        $answ_arr['d' . $key] = $file_answ[$key][$id];
+                        $answers['d' . $key] = $answersFile[$key][$id];
                     } else {
-                        if ($answ_arr['i01'] === $id) {
-                            $answ_arr['d' . $key] = $file_answ[$key][2];
+                        if ($answers['i01'] === $id) {
+                            $answers['d' . $key] = $answersFile[$key][2];
                         } else {
-                            $answ_arr['d' . $key] = $file_answ[$key][1];
+                            $answers['d' . $key] = $answersFile[$key][1];
                         }
                     }
                 }
             }
         }
-        return $answ_arr;
+        return $answers;
     }
 
 

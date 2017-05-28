@@ -3,87 +3,85 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 use classes\SessionStorage;
 use classes\FileStorage;
 
-/** @var  SessionStorage $session */
-$session = new SessionStorage('/SeanceII/src/');
+/** @var  SessionStorage $seance */
+$seance = new SessionStorage('/SeanceII/src/');
 
-/** @var  FileStorage $user_storage */
-$user_storage = new FileStorage();
+/** @var  FileStorage $userStorage */
+$userStorage = new FileStorage();
 
 $isNeedToRestore=false;
-$session->start();
-$current_page = $session->get('current_page');
+$seance->start();
+$currentPage = $seance->get('current_page');
 
 if ($_POST != null)
     if (isset($_POST['start_test'])) {
-        //renew a user login
-        $user_name = htmlentities($_POST['user_name'], ENT_QUOTES | ENT_IGNORE, "UTF-8");
-        $user_id=$session->get('user_name');
-        if (($user_id!==null) && ($user_id!=$user_name)){
+        $userName = htmlentities($_POST['user_name'], ENT_QUOTES | ENT_IGNORE, "UTF-8");
+        $userFromSeance=$seance->get('user_name');
+        if (($userFromSeance!==null) && ($userFromSeance!=$userName)){
 
-            die_nicely('Не больше одного пользователя для одного броузера!');
+            dieNicely('Не больше одного пользователя для одного броузера!');
         }
 
-        $session->set('user_name', $user_name);
+        $seance->set('user_name', $userName);
 
-        $user_storage->setUserName($user_name);
-        $user_storage->start();
-        $cp = $user_storage->get('current_page');// for check the user statement
+        $userStorage->setUserName($userName);
+        $userStorage->start();
+        $cp = $userStorage->get('current_page');
 
         if ($cp !== null) {
-            $current_page = $cp;// to old user step of the old test
-            $isNeedToRestore=true;//we have to renew this user steps
+            $currentPage = $cp;
+            $isNeedToRestore=true;
         }
         else {
 
-            $user_storage->set('user_name', $user_name);// a new user
+            $userStorage->set('user_name', $userName);
         }
 
     } else {
-        // next steps of test
-        $user_name = $session->get('user_name');
-        if ($user_name === null) { // it's imposible
-            die_nicely('Начните с начала!');
+        $userName = $seance->get('user_name');
+        if ($userName === null) {
+            dieNicely('Начните с начала!');
         }
 
-        $user_storage->setUserName($user_name);
-        $user_storage->start();
-        $cp = $user_storage->get('current_page');// for check the user statement
+        $userStorage->setUserName($userName);
+        $userStorage->start();
+        $cp = $userStorage->get('current_page');
 
-        if (($cp !== null) && ($cp > $current_page)) {
-            $current_page = $cp;// there were old steps of test
-            $isNeedToRestore=true;//we have to renew this user steps
+        if (($cp !== null) && ($cp > $currentPage)) {
+            $currentPage = $cp;
+            $isNeedToRestore=true;
         } else {
-            $session->set('sess_post', $_POST);// set a new step
+            $seance->set('sess_post', $_POST);
             if (isset($_POST['final_page'])) {
-                $current_page = '12';// go to reset this user and test. Test has been finished.
+                $currentPage = '12';
             }
         }
 
     }
 
-$session->set('current_page', $current_page);    //that is a real next page for this user
+$seance->set('current_page', $currentPage);
 if ($isNeedToRestore===true){
-    $session->set('sess_post', $user_storage->get('sess_post'));
-    $session->set('answers', $user_storage->get('answers'));
+    $seance->set('sess_post', $userStorage->get('sess_post'));
+    $seance->set('answers', $userStorage->get('answers'));
 }
-$session->set('order','correct');
-$session->flush();
+$seance->set('order','correct');
+$seance->flush();
 
 if ($isNeedToRestore===false) {
-    $user_storage->set('current_page', $current_page);
-    $user_storage->set('sess_post', $session->get('sess_post'));
-    $user_storage->set('answers', $session->get('answers'));
-    $user_storage->flush();
+    $userStorage->set('current_page', $currentPage);
+    $userStorage->set('sess_post', $seance->get('sess_post'));
+    $userStorage->set('answers', $seance->get('answers'));
+    $userStorage->flush();
 }
 
 
-switch ($current_page) {
+switch ($currentPage) {
     case "11":
         header('Refresh: 0;url=../code/final_page.php');
         break;
     case "12":
-        $session->close();// clear an old session
-        $user_storage->close();// delete user at all
+        $seance->close();
+        $userStorage->close();
         header('Refresh: 0;url=../code/index.php');
         break;
     default:
@@ -91,9 +89,9 @@ switch ($current_page) {
         break;
 }
 
-function die_nicely($msg) {
+function dieNicely($msg) {
  echo <<<END
-<div id="critical_error" style="color: red;border: solid thin">$msg</div>
+<div id="critical_error" style="color: red;border: solid thin"><h2>$msg</h2></div>
 END;
     exit;
 }
