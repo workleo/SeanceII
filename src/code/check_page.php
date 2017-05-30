@@ -1,10 +1,10 @@
 <?php
 require_once __DIR__ . '/../../vendor/autoload.php';
-use classes\SessionStorage;
+use classes\SeanceStorage;
 use classes\FileStorage;
 
-/** @var  SessionStorage $seance */
-$seance = new SessionStorage('/SeanceII/src/');
+/** @var  SeanceStorage $seance */
+$seance = new SeanceStorage('/SeanceII/src/');
 
 /** @var  FileStorage $userStorage */
 $userStorage = new FileStorage();
@@ -24,8 +24,8 @@ if ($_POST != null)
 
         $seance->set('user_name', $userName);
 
-        $userStorage->setUserName($userName);
-        $userStorage->start();
+
+        $userStorage->start($userName);
         $cp = $userStorage->get('current_page');
 
         if ($cp !== null) {
@@ -43,15 +43,14 @@ if ($_POST != null)
             dieNicely('Начните с начала!');
         }
 
-        $userStorage->setUserName($userName);
-        $userStorage->start();
+        $userStorage->start($userName);
         $cp = $userStorage->get('current_page');
 
         if (($cp !== null) && ($cp > $currentPage)) {
             $currentPage = $cp;
             $isNeedToRestore=true;
         } else {
-            $seance->set('sess_post', $_POST);
+            $seance->set('postOption', $_POST['option']);
             if (isset($_POST['final_page'])) {
                 $currentPage = '12';
             }
@@ -61,7 +60,7 @@ if ($_POST != null)
 
 $seance->set('current_page', $currentPage);
 if ($isNeedToRestore===true){
-    $seance->set('sess_post', $userStorage->get('sess_post'));
+    $seance->set('postOption', $userStorage->get('postOption'));
     $seance->set('answers', $userStorage->get('answers'));
 }
 $seance->set('order','correct');
@@ -69,17 +68,17 @@ $seance->flush();
 
 if ($isNeedToRestore===false) {
     $userStorage->set('current_page', $currentPage);
-    $userStorage->set('sess_post', $seance->get('sess_post'));
+    $userStorage->set('postOption', $seance->get('postOption'));
     $userStorage->set('answers', $seance->get('answers'));
     $userStorage->flush();
 }
 
 
 switch ($currentPage) {
-    case "11":
+    case 11:
         header('Refresh: 0;url=../code/final_page.php');
         break;
-    case "12":
+    case 12:
         $seance->close();
         $userStorage->close();
         header('Refresh: 0;url=../code/index.php');

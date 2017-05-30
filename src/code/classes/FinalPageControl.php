@@ -4,7 +4,7 @@ namespace classes;
 
 class FinalPageControl
 {
-    /** @var  SessionStorage $seance */
+    /** @var  SeanceStorage $seance */
     private $seance;
     private $pictureSrc;
     private $pageTitle;
@@ -12,7 +12,7 @@ class FinalPageControl
 
     public function seanceExecute()
     {
-        $this->seance = new SessionStorage('/SeanceII/src/');
+        $this->seance = new SeanceStorage('/SeanceII/src/');
         $this->seance->start();
         $this->userName=$this->seance->get('user_name');
         $this->pictureSrc = '../res/img/logo.png';
@@ -41,15 +41,15 @@ class FinalPageControl
     public function getPictureSrcArr()
     {
         return array(
-            'p01' => '../res/img/pict01.jpg',
-            'p02' => '../res/img/pict02.jpg',
-            'p03' => '../res/img/pict03.jpg',
-            'p04' => '../res/img/pict04.jpg',
-            'p05' => '../res/img/pict05.jpg',
-            'p06' => '../res/img/pict06.jpg',
-            'p07' => '../res/img/pict07.jpg',
-            'p08' => '../res/img/pict08.jpg',
-            'p09' => '../res/img/pict09.jpg',
+            'p1' => '../res/img/pict1.jpg',
+            'p2' => '../res/img/pict2.jpg',
+            'p3' => '../res/img/pict3.jpg',
+            'p4' => '../res/img/pict4.jpg',
+            'p5' => '../res/img/pict5.jpg',
+            'p6' => '../res/img/pict6.jpg',
+            'p7' => '../res/img/pict7.jpg',
+            'p8' => '../res/img/pict8.jpg',
+            'p9' => '../res/img/pict9.jpg',
             'p10' => '../res/img/pict10.jpg'
         );
     }
@@ -88,10 +88,10 @@ class FinalPageControl
                     $answers['t' . $key] = $answersFile[$key][0];
                     $answers['i' . $key] = $id;
                     $answers['a' . $key] = 'Ваш ответ :' . $val;
-                    if ($key !== '05') {
+                    if ($key !== 5) {
                         $answers['d' . $key] = $answersFile[$key][$id];
                     } else {
-                        if ($answers['i01'] === $id) {
+                        if ($answers['i1'] === $id) {
                             $answers['d' . $key] = $answersFile[$key][2];
                         } else {
                             $answers['d' . $key] = $answersFile[$key][1];

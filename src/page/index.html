@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>{{page_title}}</title>
+    <title>{{indexControls.getTitle()}}</title>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -32,7 +32,7 @@
         <div class="row">
             <div class="col-md-6"><h4>
                 {% autoescape false %}
-                {{description}}
+                {{indexControls.getDescription()}}
                 {% endautoescape %}
             </h4></div>
         </div>
@@ -45,7 +45,7 @@
             <input id="name" name="user_name" onkeyup="checkName()" type="text" placeholder="Введите имя" autocomplete="off"
                    /><br>
             <input class="btn btn-info text-center" type="submit" name="start_test" id="btn_submit"
-                   value="{{submit_value}}"
+                   value="{{indexControls.getSubmitValue()}}"
                    style=" background-color: rgba(54,52,27,0.85);"  disabled="disabled"/>
             <br>
             <!--suppress  HtmlUnknownTarget -->

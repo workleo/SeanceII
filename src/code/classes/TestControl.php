@@ -4,7 +4,7 @@ namespace classes;
 
 class TestControl
 {
-    /** @var  SessionStorage $seance */
+    /** @var  SeanceStorage $seance */
     private $seance;
     private $currentPage;
     private $questionsArr;
@@ -16,7 +16,7 @@ class TestControl
 
     public function seanceExecute()
     {
-        $this->seance = new SessionStorage('/SeanceII/src/');
+        $this->seance = new SeanceStorage('/SeanceII/src/');
         $this->seance->start();
 
         if (($this->seance->get('order') !== null) && ($this->seance->get('order') === 'wrong')) {
@@ -30,8 +30,8 @@ class TestControl
         $this->currentPage = $this->seance->get('current_page');
 
 
-        if ($this->seance->get('sess_post') == null)
-            $this->currentPage = '00';
+        if ($this->seance->get('postOption') == null)
+            $this->currentPage = 0;
 
         $this->analyseOfSource();
         $this->saveSeance();
@@ -66,44 +66,42 @@ class TestControl
     }
 
 
-    public function getSessionPage()
+    public function getSeancePage()
     {
         return $this->seance->get('current_page');
     }
 
-    private function prepareQuestionsArray(string $id_page)
+    private function prepareQuestionsArray(string $idPage)
     {
-        $fileName = $_SERVER['DOCUMENT_ROOT'] . 'src/res/test_txt/ask' . $id_page . '.txt';
+        $fileName = __DIR__. '/../../res/test_txt/ask' . $idPage . '.txt';
         $json = file_get_contents($fileName);
         $this->questionsArr = json_decode($json, true);
     }
 
 
-    private function preparePageParams(string $id_page)
+    private function preparePageParams(string $idPage)
     {
-        $this->prepareQuestionsArray($id_page);
-        $this->pictureSrc = '../res/img/pict' . $id_page . '.jpg';
-        $this->pageTitle = "Картинка №" . $id_page;
+        $this->prepareQuestionsArray($idPage);
+        $this->pictureSrc = '../res/img/pict' . $idPage . '.jpg';
+        $this->pageTitle = "Картинка №" . $idPage;
 
         $this->registerPage();
         $this->saveSeance();
     }
 
-    private function registerAnswer(string $id_page): bool
+    private function registerAnswer(string $idPage): bool
     {
-        $seancePost = $this->seance->get('sess_post');
+        $key  = $this->seance->get('postOption');
 
-        if (($seancePost != null) && (isset($seancePost['option']))) {
-            $this->prepareQuestionsArray($id_page);
+        if ($key  != null)  {
+            $this->prepareQuestionsArray($idPage);
             $answOptionsArray = $this->seance->get('answers');
             if ($answOptionsArray == null) {
                 $answOptionsArray = [];
             }
 
-            $key = '' . $seancePost['option'];
-            $key = $this->numberToName($key);
-            $newRecord = [$seancePost['option'] => $this->questionsArr[$key]];
-            $answOptionsArray[$id_page] = $newRecord;
+            $newRecord = [$key  => $this->questionsArr[$key]];
+            $answOptionsArray[$idPage] = $newRecord;
 
             if (!(is_array($answOptionsArray))) {
                 die('Something went wrong.' . $answOptionsArray . ' is not an array.');
@@ -123,45 +121,36 @@ class TestControl
         $this->seance->set('current_page', $this->currentPage);
     }
 
-    private function preparePage(string $id_page)
+    private function preparePage(string $idPage)
     {
-        $this->currentPage = $id_page;
-        $this->preparePageParams($id_page);
+        $this->currentPage = $idPage;
+        $this->preparePageParams($idPage);
     }
 
 
-    private function numberToName(int $nr): string
-    {
-        $name = $nr;
-        if (strlen($name) == 1) {
-            $name = '0' . $name;
-        }
-        return $name;
-    }
 
     private function analyseOfSource()
     {
         $page = (int)$this->currentPage;
 
         if (!$this->isReload) {
-            $nextPage = $this->numberToName($page + 1);
+            $nextPage = $page + 1;
         } else {
             $nextPage = $this->currentPage;
         }
 
         switch (true) {
             case $page == 0:
-                $this->preparePage("01");
+                $this->preparePage(1);
                 break;
-            case ($page > 0 && $page < 10) ://01-09
+            case ( $page < 10) :
                 if ($this->registerAnswer($this->currentPage))
                     $this->preparePage($nextPage);
                 break;
             case $page == 10:
-                if ($this->registerAnswer($this->currentPage)) {//10
-                    $this->currentPage = '11';
+                if ($this->registerAnswer($this->currentPage)) {
+                    $this->currentPage = 11;
                     $this->registerPage();
-
                 }
                 break;
         }

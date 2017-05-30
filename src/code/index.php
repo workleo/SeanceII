@@ -11,9 +11,7 @@ try {
     $twig = new Twig_Environment($loader);
 
     echo $twig->render('index.html', array(
-        'page_title' => $indexPageControl->getTitle(),
-        'description' => $indexPageControl->getDescription(),
-        'submit_value' => $indexPageControl->getSubmitValue(),
+        'indexControls'=>$indexPageControl,
         'edem' => '../res/img/ESCHER_paradise.jpg',
         array('auto_reload' => true)
     ));

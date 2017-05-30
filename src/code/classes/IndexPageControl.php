@@ -19,7 +19,7 @@ class IndexPageControl
     public function getDescription(): string
     {
         $description = '';
-        $fileName = $_SERVER['DOCUMENT_ROOT'] . '/src/res/test_txt/start.txt';
+        $fileName = __DIR__ . '/../../res/test_txt/start.txt';
         if (file_exists($fileName) === true) {
             $json = file_get_contents($fileName);
             $description = json_decode($json, true)['description'];

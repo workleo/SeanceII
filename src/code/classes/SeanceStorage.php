@@ -1,26 +1,25 @@
 <?php
 /**
- * Class SessionStorage is a special class for a sessions imitation
+ * Class SeanceStorage is a special class for a seances imitation
  */
 
 namespace classes;
 
-class SessionStorage extends FileStorage
+class SeanceStorage extends Storage
 {
-    private $sessionId;
-    private $sessionFolder;
+    private $seanceId;
+    private $seanceFolder;
     private $cookiePath;
-    const SESSION_ID = "SEANCE_ID";
-
-    private $fileName;
+    const SEANCE_ID = "SEANCE_ID";
+    private $seanceFileName;
 
 
     function __construct($cookiePath = '/')
     {
-        $this->sessionId = '';
-        $this->fileName = '';
+        $this->seanceId = '';
+        $this->seanceFileName = '';
         $this->cookiePath = $cookiePath;
-        $this->sessionFolder = $_SERVER['DOCUMENT_ROOT'] . '/tmp/seance';
+        $this->seanceFolder = __DIR__ . '/../../../tmp/seance';
     }
 
 
@@ -33,7 +32,7 @@ class SessionStorage extends FileStorage
     }
 
 
-    private function isCorrectSession()
+    private function isCorrectSeance()
     {
         return (
             ($this->get('HTTP_USER_AGENT') === $_SERVER['HTTP_USER_AGENT'])
@@ -42,7 +41,7 @@ class SessionStorage extends FileStorage
         );
     }
 
-    private function setSessionParams()
+    private function setSeanceParams()
     {
         $this->set('HTTP_USER_AGENT', $_SERVER['HTTP_USER_AGENT']);
         $this->set('REMOTE_ADDR', $_SERVER['REMOTE_ADDR']);
@@ -51,10 +50,10 @@ class SessionStorage extends FileStorage
     }
 
 
-    private function checkSessionFolder()
+    private function checkSeanceFolder()
     {
-        if (!file_exists($this->sessionFolder)) {
-            mkdir($this->sessionFolder, 0744, true) or die("Unable to create a folder of session!");
+        if (!file_exists($this->seanceFolder)) {
+            mkdir($this->seanceFolder, 0744, true) or die("Unable to create a folder of seance!");
         }
     }
 
@@ -63,22 +62,22 @@ class SessionStorage extends FileStorage
     {
         $this->json = null;
         try {
-            if (isset($_COOKIE[self::SESSION_ID])) {
-                $this->fileName = $this->sessionFolder . '/' . $_COOKIE[self::SESSION_ID];
-                if (file_exists($this->fileName) === true) {
+            if (isset($_COOKIE[self::SEANCE_ID])) {
+                $this->seanceFileName = $this->seanceFolder . '/' . $_COOKIE[self::SEANCE_ID];
+                if (file_exists($this->seanceFileName) === true) {
 
                     try {
-                        $this->json = json_decode(file_get_contents($this->fileName),true);
-                        if (!$this->isCorrectSession()) {
-                            $message = 'COOKIE:' . $_COOKIE[self::SESSION_ID] . "\n"
+                        $this->json = json_decode(file_get_contents($this->seanceFileName),true);
+                        if (!$this->isCorrectSeance()) {
+                            $message = 'COOKIE:' . $_COOKIE[self::SEANCE_ID] . "\n"
                                 . 'server:' . $_SERVER['HTTP_USER_AGENT'] . "\n"
                                 . 'this  :' . $this->get('HTTP_USER_AGENT') . "\n"
                                 . 'server:' . $_SERVER['REMOTE_ADDR'] . "\n"
                                 . 'this  :' . $this->get('REMOTE_ADDR') . "\n"
                                 . 'server:' . $_SERVER['HTTP_X_FORWARDED_FOR'] . "\n"
                                 . 'this  :' . $this->get('HTTP_X_FORWARDED_FOR') . "\n";
-                            error_log($message, 3, $this->sessionFolder . '/' . "errors.log");
-                            die('It"s a fake session');
+                            error_log($message, 3, $this->seanceFolder . '/' . "errors.log");
+                            die('It"s a fake seance');
                         }
                     } finally {
                         $this->close();
@@ -86,23 +85,23 @@ class SessionStorage extends FileStorage
                 }
             }
         } finally {
-            $this->sessionId = $this->pseudoGuid4();
-            $this->fileName = $this->sessionFolder . '/' . $this->sessionId;
-            $this->checkSessionFolder();
-            setcookie(self::SESSION_ID, $this->sessionId, 0, $this->cookiePath);
-            $this->setSessionParams();
+            $this->seanceId = $this->pseudoGuid4();
+            $this->seanceFileName = $this->seanceFolder . '/' . $this->seanceId;
+            $this->checkSeanceFolder();
+            setcookie(self::SEANCE_ID, $this->seanceId, 0, $this->cookiePath);
+            $this->setSeanceParams();
         }
     }
 
     function close()
     {
-        @unlink($this->fileName);
-        setcookie(self::SESSION_ID, $this->sessionId, time() - 3600);
+        @unlink($this->seanceFileName);
+        setcookie(self::SEANCE_ID, $this->seanceId, time() - 3600);
     }
 
-    function flush()
+  function flush()
     {
-        file_put_contents($this->fileName,json_encode( $this->json));
+        file_put_contents($this->seanceFileName,json_encode( $this->json));
     }
 
 }

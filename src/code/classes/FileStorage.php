@@ -1,19 +1,18 @@
 <?php
 namespace classes;
 
-class FileStorage
+class FileStorage extends  Storage
 {
     private $userName;
-    private $fileName;
-    protected $json;
+    private $userFileName;
     private $usersFolder;
 
 
-    public function setUserName($userName)
+    private function setUserName($userName)
     {
         $this->userName = $userName;
-        $this->usersFolder = $_SERVER['DOCUMENT_ROOT'] . '/tmp/users';
-        $this->fileName = $this->usersFolder . '/' . $this->userName;
+        $this->usersFolder = __DIR__ . '/../../../tmp/users';
+        $this->userFileName = $this->usersFolder . '/' . $this->userName;
     }
 
 
@@ -25,65 +24,31 @@ class FileStorage
     }
 
 
-    function start()
+    function start($userName)
     {
+        $this->setUserName($userName);
+
         $this->json = null;
         try {
-                if (file_exists($this->fileName) === true) {
-                        $this->json = json_decode(file_get_contents($this->fileName),true);
+                if (file_exists($this->userFileName) === true) {
+                        $this->json = json_decode(file_get_contents($this->userFileName),true);
                 }
         } finally {
-            $this->fileName = $this->usersFolder . '/' . $this->userName;
+            $this->userFileName = $this->usersFolder . '/' . $this->userName;
             $this->checkUsersFolder();
         }
     }
 
-    function get($key)
-    {
-
-        $value = $this->json[$key];
-        if ($value === null) return $value;
-
-        if (preg_match("/(a|O|s|b)\:[0-9]*?((\:((\{?(.+)\})|(\"(.+)\"\;)))|(\;))/", $value) == 1) {
-            return unserialize($value);
-        } else {
-            return $value;
-        }
-    }
-
-    function set($key, $value)
-    {
-        if ($value === null) {
-            $value = '';
-        }
-
-        if (is_object($value) || is_array($value)) {
-            $this->json[$key] = serialize($value);
-        } else {
-            $this->json[$key] = $value;
-        }
-    }
-
-    function remove($key)
-    {
-
-        foreach ($this->json as $id => $row) {
-            if ($id === $key) {
-                unset($this->json[$id]);
-                break;
-            }
-        }
-    }
 
     function flush()
     {
-        file_put_contents($this->fileName, json_encode($this->json));
+        file_put_contents($this->userFileName, json_encode($this->json));
     }
 
 
 
     function close()
     {
-        @unlink($this->fileName);
+        @unlink($this->userFileName);
     }
 }
