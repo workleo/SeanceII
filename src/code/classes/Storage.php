@@ -1,5 +1,5 @@
 <?php
-namespace classes;
+namespace Code\Classes;
 
 
 class Storage

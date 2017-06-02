@@ -3,15 +3,18 @@
  * Class SeanceStorage is a special class for a seances imitation
  */
 
-namespace classes;
+namespace Code\Classes;
 
 class SeanceStorage extends Storage
 {
+    const SEANCE_ID = "SEANCE_ID";
     private $seanceId;
     private $seanceFolder;
     private $cookiePath;
-    const SEANCE_ID = "SEANCE_ID";
+
     private $seanceFileName;
+    /** @var JsonFileIO $jsonFileIO */
+    private $jsonFileIO;
 
 
     function __construct($cookiePath = '/')
@@ -20,7 +23,9 @@ class SeanceStorage extends Storage
         $this->seanceFileName = '';
         $this->cookiePath = $cookiePath;
         $this->seanceFolder = __DIR__ . '/../../../tmp/seance';
+        $this->jsonFileIO = new JsonFileIO();
     }
+
 
 
     private function pseudoGuid4(): string
@@ -52,8 +57,8 @@ class SeanceStorage extends Storage
 
     private function checkSeanceFolder()
     {
-        if (!file_exists($this->seanceFolder)) {
-            mkdir($this->seanceFolder, 0744, true) or die("Unable to create a folder of seance!");
+        if (!$this->jsonFileIO->isFolderExist($this->seanceFolder)) {
+            die("Unable to create a folder of seance!");
         }
     }
 
@@ -64,10 +69,10 @@ class SeanceStorage extends Storage
         try {
             if (isset($_COOKIE[self::SEANCE_ID])) {
                 $this->seanceFileName = $this->seanceFolder . '/' . $_COOKIE[self::SEANCE_ID];
-                if (file_exists($this->seanceFileName) === true) {
+                if ($this->jsonFileIO->isFileExist($this->seanceFileName) === true) {
 
                     try {
-                        $this->json = json_decode(file_get_contents($this->seanceFileName),true);
+                        $this->json = $this->jsonFileIO->getJsonFromFile($this->seanceFileName);
                         if (!$this->isCorrectSeance()) {
                             $message = 'COOKIE:' . $_COOKIE[self::SEANCE_ID] . "\n"
                                 . 'server:' . $_SERVER['HTTP_USER_AGENT'] . "\n"
@@ -95,13 +100,14 @@ class SeanceStorage extends Storage
 
     function close()
     {
-        @unlink($this->seanceFileName);
-        setcookie(self::SEANCE_ID, $this->seanceId, time() - 3600);
+        if ($this->jsonFileIO->deleteFile($this->seanceFileName) === true) {
+            setcookie(self::SEANCE_ID, $this->seanceId, time() - 3600);
+        }
     }
 
-  function flush()
+    function flush()
     {
-        file_put_contents($this->seanceFileName,json_encode( $this->json));
+        $this->jsonFileIO->flushJsonToFile($this->seanceFileName, $this->json);
     }
 
 }

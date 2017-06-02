@@ -1,11 +1,20 @@
 <?php
-namespace classes;
 
-class FileStorage extends  Storage
+namespace Code\Classes;
+
+class UserStorage extends Storage
 {
     private $userName;
     private $userFileName;
     private $usersFolder;
+    /** @var JsonFileIO $jsonFileIO */
+    private $jsonFileIO;
+
+
+    public function __construct()
+    {
+        $this->jsonFileIO = new JsonFileIO();
+    }
 
 
     private function setUserName($userName)
@@ -13,13 +22,14 @@ class FileStorage extends  Storage
         $this->userName = $userName;
         $this->usersFolder = __DIR__ . '/../../../tmp/users';
         $this->userFileName = $this->usersFolder . '/' . $this->userName;
+
     }
 
 
     private function checkUsersFolder()
     {
-        if (!file_exists($this->usersFolder)) {
-            mkdir($this->usersFolder, 0744, true) or die("Unable to create a users folder!");
+        if (!$this->jsonFileIO->isFolderExist($this->usersFolder)) {
+            die("Unable to create a users folder!");
         }
     }
 
@@ -30,9 +40,10 @@ class FileStorage extends  Storage
 
         $this->json = null;
         try {
-                if (file_exists($this->userFileName) === true) {
-                        $this->json = json_decode(file_get_contents($this->userFileName),true);
-                }
+            if ($this->jsonFileIO->isFileExist($this->userFileName) === true) {
+                $this->json = $this->jsonFileIO->getJsonFromFile($this->userFileName);
+            }
+
         } finally {
             $this->userFileName = $this->usersFolder . '/' . $this->userName;
             $this->checkUsersFolder();
@@ -42,13 +53,12 @@ class FileStorage extends  Storage
 
     function flush()
     {
-        file_put_contents($this->userFileName, json_encode($this->json));
+        $this->jsonFileIO->flushJsonToFile($this->userFileName, $this->json);
     }
-
 
 
     function close()
     {
-        @unlink($this->userFileName);
+        $this->jsonFileIO->deleteFile($this->userFileName);
     }
 }

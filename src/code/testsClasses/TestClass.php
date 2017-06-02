@@ -1,5 +1,6 @@
 <?php
-namespace TestStorage;
+namespace Code\TestClasses;
+
 class TestClass
 {
   private $name;

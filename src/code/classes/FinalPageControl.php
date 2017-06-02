@@ -1,6 +1,6 @@
 <?php
 
-namespace classes;
+namespace Code\Classes;
 
 class FinalPageControl
 {
@@ -14,12 +14,19 @@ class FinalPageControl
     {
         $this->seance = new SeanceStorage('/SeanceII/src/');
         $this->seance->start();
-        $this->userName=$this->seance->get('user_name');
-        $this->pictureSrc = '../res/img/logo.png';
-        $this->pageTitle = 'Результат';
-        $this->seance->set('current_page', '12');
+        $this->userName = $this->seance->get('user_name');
 
+        $this->seance->set('current_page', '12');
         $this->seance->flush();
+
+        if ($this->userName === null) {
+            $this->seance->close();
+            header('Refresh: 0;url=../code/index.php');
+        } else {
+            $this->pictureSrc = '../res/img/logo.png';
+            $this->pageTitle = 'Результат';
+            $this->seance->flush();
+        }
     }
 
     public function getUserName()
@@ -57,7 +64,7 @@ class FinalPageControl
     public function getDescription(): string
     {
         $description = '';
-        $fileName =__DIR__.'/../../res/test_txt/end.txt';
+        $fileName = __DIR__ . '/../../res/test_txt/end.txt';
         if (file_exists($fileName) === true) {
             $json = file_get_contents($fileName);
             $description = json_decode($json, true)['description'];
@@ -102,8 +109,6 @@ class FinalPageControl
         }
         return $answers;
     }
-
-
 
 
 }

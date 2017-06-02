@@ -15,8 +15,8 @@
     },
     "autoload": {
         "psr-4": {
-            "classes\\": "src/code/classes/",
-            "test_storage\\":"src/code/test_storage/"
+            "Code\\Classes\\": "src/code/classes/",
+            "Code\\TestClasses\\":"src/code/testsClasses/"
         }
     }
 

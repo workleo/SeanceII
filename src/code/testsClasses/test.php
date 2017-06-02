@@ -1,12 +1,13 @@
 <?php
 require_once __DIR__ . '/../../../vendor/autoload.php';
-use classes\SeanceStorage;
-use classes\FileStorage;
-use TestStorage\TestClass;
+use Code\Classes\SeanceStorage;
+use Code\Classes\UserStorage;
+use Code\TestClasses\TestClass;
+
 
 $sess=new SeanceStorage();
 $sess->start();
-echo $_COOKIE[SeanceStorage::SEANCE_ID];
+echo $_COOKIE[SeanceStorage::SEANCE_ID];//[SeanceStorage::SEANCE_ID];
 echo '<br>';
 
 $sess->set('key1','value1');
@@ -53,7 +54,7 @@ $sess->flush();
 print('the test of seance finished<br> Start test Users file<br>');
 //$sess->close();
 
-$fu=new FileStorage();
+$fu=new UserStorage();
 //$fu->setUserName('Test_User');
 $fu->start('Test_User');
 
